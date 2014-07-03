@@ -24,6 +24,13 @@ RAPIDJSON_DIAG_PUSH
 RAPIDJSON_DIAG_OFF(4127)  // conditional expression is constant
 #endif
 
+#ifdef RAPIDJSON_THROWPARSEEXCEPTION
+#include <stdexcept>
+#define RAPIDJSON_PARSE_ERROR_EARLY_RETURN(what) ((void)0)
+#define RAPIDJSON_PARSE_ERROR_NORETURN(parseErrorCode,offset) \
+  throw ParseException(parseErrorCode,#parseErrorCode,offset)
+#endif
+
 #define RAPIDJSON_NOTHING /* deliberately empty */
 #ifndef RAPIDJSON_PARSE_ERROR_EARLY_RETURN
 #define RAPIDJSON_PARSE_ERROR_EARLY_RETURN(value) \
@@ -53,6 +60,13 @@ RAPIDJSON_DIAG_OFF(4127)  // conditional expression is constant
 #include "error/error.h" // ParseErrorCode, ParseResult
 
 namespace rapidjson {
+
+#ifdef RAPIDJSON_THROWPARSEEXCEPTION
+struct ParseException : std::runtime_error, ParseResult {
+	ParseException(ParseErrorCode code, const char* msg, size_t offset)
+	  : std::runtime_error(msg), ParseResult(code,offset) {}
+};
+#endif // RAPIDJSON_THROWPARSEEXCEPTION
 
 ///////////////////////////////////////////////////////////////////////////////
 // ParseFlag
